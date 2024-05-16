@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Jogadores {
+  id            String @id @default(uuid())
+  nome          String
+  idade         Int
+  posicao       String
+  nacionalidade String
+
+  times JogadoresTimes[]
+
+  @@map("jogadores")
+}
+
+model Times {
+  id      String   @id @default(uuid())
+  nome    String
+  ano     DateTime
+  pais    String
+  tecnico String
+
+  jogadores JogadoresTimes[]
+  PartidaCasa   Partidas[] @relation("timeCasa")
+  PartidaVisitante   Partidas[] @relation("timeVisitante")
+
+  @@map("times")
+}
+
+model Partidas {
+  id     String   @id @default(uuid())
+  data   DateTime
+  local  String
+  placar String
+
+  timeCasa_id String
+  timeCasa    Times   @relation("timeCasa", fields: [timeCasa_id], references: [id])
+
+  timeVisitante_id String
+  timeVisitante    Times    @relation("timeVisitante", fields: [timeVisitante_id], references: [id])
+
+  @@map("partidas")
+}
+
+model JogadoresTimes {
+  id String @id @default(uuid())
+
+  times      Times   @relation(fields: [fk_id_times], references: [id])
+  fk_id_times String
+
+  jogadores      Jogadores @relation(fields: [fk_id_jogadores], references: [id])
+  fk_id_jogadores String
+
+  @@map("jogadores_times")
+}
